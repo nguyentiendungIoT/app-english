@@ -30,10 +30,7 @@ app.mount("/static", StaticFiles(directory="web"), name="web_static")
 
 
 # Read from environment variable (set on Render/hosting platform)
-# Fallback to local key only for development
-GEMINI_API_KEY = os.environ.get(
-    "GEMINI_API_KEY", "AIzaSyD9wQA1kk9nMOcNoxbm0zYe0ly2DBou08U"
-)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 
 class NewsRequest(BaseModel):
