@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App English - AI News & Reading</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Settings -->
+        <aside class="sidebar">
+            <h2 class="app-logo">English Audio AI</h2>
+
+            <div class="control-group">
+                <label for="modelSelect">Gemini Model</label>
+                <select id="modelSelect">
+                    <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (Fast & Free Tier)</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (High Quality)</option>
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                    <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="newsTopic">Topic to Generate News</label>
+                <input type="text" id="newsTopic" placeholder="e.g. Technology breakthroughs today...">
+                <button id="btnGenerate" class="gemini-btn">✨ Generate News Article</button>
+            </div>
+
+            <hr>
+
+            <div class="control-group">
+                <label for="voiceSelect">Voice</label>
+                <select id="voiceSelect">
+                    <option value="gemini-audio">✨ Gemini Premium Audio (No Highlight)</option>
+                    <option value="en-US-AndrewMultilingualNeural" selected>Andrew (Clear, Male)</option>
+                    <option value="en-US-EmmaMultilingualNeural">Emma (Clear, Female)</option>
+                    <option value="en-US-AriaNeural">Aria (Professional, Female)</option>
+                    <option value="en-US-GuyNeural">Guy (Standard, Male)</option>
+                    <option value="vi-VN-HoaiMyNeural">Hoai My (VN English Accent, Female)</option>
+                    <option value="en-GB-SoniaNeural">Sonia (British, Female)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="speedSelect">Speaking Speed</label>
+                <select id="speedSelect">
+                    <option value="-20%">Slow (-20%)</option>
+                    <option value="-10%">Normal Slow (-10%)</option>
+                    <option value="+0%" selected>Normal (+0%)</option>
+                    <option value="+10%">Fast (+10%)</option>
+                    <option value="+20%">Very Fast (+20%)</option>
+                </select>
+            </div>
+
+            <div class="playback-controls">
+                <button id="btnSpeak" class="primary-btn">▶ Speak Text</button>
+                <button id="btnPause" class="secondary-btn" disabled>⏸ Pause</button>
+            </div>
+
+            <p id="statusText" class="status-msg">Ready.</p>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="text-editor-container">
+                <div class="text-overlay" id="textOverlay"></div>
+                <textarea id="textContent" spellcheck="false"
+                    placeholder="Write something in English to listen to, or use the 'Generate News' button on the left to create a real-time news article using Gemini AI!"></textarea>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

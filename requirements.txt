@@ -1,0 +1,17 @@
+# Web Server
+fastapi==0.135.1
+uvicorn==0.40.0
+python-multipart==0.0.21
+
+# Text-to-Speech
+edge-tts==7.2.7
+
+# Gemini AI
+google-genai==1.59.0
+
+# Pydantic
+pydantic==2.12.5
+
+# Document parsing
+python-docx>=1.1.0
+PyMuPDF>=1.23.0

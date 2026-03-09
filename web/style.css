@@ -1,0 +1,266 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0b1120;
+    /* Deeper slate background for contrast */
+    background-image: radial-gradient(circle at top right, #1e1b4b 0%, #0b1120 40%),
+        radial-gradient(circle at bottom left, #0f172a 0%, #0b1120 40%);
+    color: #f1f5f9;
+    /* Slate 100 Text */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.app-container {
+    display: flex;
+    width: 95%;
+    max-width: 1400px;
+    height: 90vh;
+    background: rgba(15, 23, 42, 0.7);
+    /* Translucent Slate 900 */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    /* Subtle Slate 700 border */
+    margin: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 350px;
+    background: #111827;
+    /* Gray 900 */
+    border-right: 1px solid #374151;
+    /* Gray 700 */
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.app-logo {
+    font-size: 1.5rem;
+    color: #f8fafc;
+    margin-bottom: 5px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to right, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-group label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    /* Slate 300 */
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+input[type="text"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    /* Slate 600 */
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    background: rgba(30, 41, 59, 0.8);
+    /* Slate 800 */
+    color: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    /* Blue 500 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.gemini-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    margin-top: 5px;
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+}
+
+.gemini-btn:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+.playback-controls {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.primary-btn {
+    flex: 2;
+    background-color: #10b981;
+    /* Emerald 500 */
+    color: white;
+}
+
+.primary-btn:hover:not(:disabled) {
+    background-color: #059669;
+}
+
+.secondary-btn {
+    flex: 1;
+    background-color: #334155;
+    /* Slate 700 */
+    color: white;
+}
+
+.secondary-btn:hover:not(:disabled) {
+    background-color: #475569;
+}
+
+.status-msg {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-align: center;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #334155;
+    margin: 10px 0;
+}
+
+/* Main Content area */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    background-color: #0f172a;
+    /* Slate 900 */
+}
+
+.text-editor-container {
+    position: relative;
+    flex: 1;
+    background: rgba(15, 23, 42, 0.5);
+    /* Semi-transparent Slate 900 */
+    border: 1px solid rgba(51, 65, 85, 0.5);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+#textContent,
+.text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 1.6rem;
+    /* Huge readable text */
+    line-height: 1.8;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    letter-spacing: 0.2px;
+}
+
+#textContent {
+    background: transparent;
+    color: transparent;
+    caret-color: #f8fafc;
+    border: none;
+    resize: none;
+    z-index: 2;
+}
+
+#textContent:focus {
+    outline: none;
+}
+
+/* Scrollbar Styling for Dark Theme */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+.text-overlay {
+    background: transparent;
+    color: #cbd5e1;
+    /* Slate 300 base text */
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Highlight styling for Premium Dark Mode */
+.highlight-spoken {
+    color: #64748b;
+    /* Lighter Slate so it's readable but clearly "read" */
+    transition: color 0.1s ease;
+}
+
+.highlight-current-word {
+    background-color: #f59e0b;
+    color: #111827;
+}
