@@ -200,73 +200,98 @@ async function sysnthesizeChunks(fullText) {
         return;
     }
 
-    // edge-tts: process sentence by sentence with pre-fetching
+    // edge-tts: process sentence by sentence with multi-chunk pre-fetching
     sentenceQueue = splitIntoSentences(fullText);
-    sentenceIndex = 0;
+    sentenceIndex = 0; // Currently playing index
+    let fetchIndex = 0; // Currently fetching index
+    const chunkBuffer = []; // Sliding window of fetched audio chunks
+    const BUFFER_SIZE = 3; // Number of chunks to keep ahead
 
-    async function playNextChunk() {
-        if (!synthesisActive || sentenceIndex >= sentenceQueue.length) {
-            if (synthesisActive) { stopPlayback(); elStatus.textContent = "Finished reading."; }
-            return;
-        }
+    // Background worker to continuously pre-fetch chunks
+    async function fillBuffer() {
+        while (synthesisActive && fetchIndex < sentenceQueue.length) {
+            if (chunkBuffer.length < BUFFER_SIZE) { // Room in buffer
+                const currentIndex = fetchIndex;
+                const sentObj = sentenceQueue[currentIndex];
+                fetchIndex++; // Move ahead so next iteration fetches the next sentence
 
-        const sentObj = sentenceQueue[sentenceIndex];
-        const sentence = sentObj.text;
-        const myOffset = sentObj.offset; // exact char position in fullText
+                try {
+                    const data = await fetchAudioChunk(sentObj.text, voice, rate);
+                    if (!synthesisActive) return; // User stopped
 
-        try {
-            const data = await fetchAudioChunk(sentence, voice, rate);
-            if (!synthesisActive) return;
+                    // Push the completed audio & boundaries to the queue
+                    chunkBuffer.push({
+                        index: currentIndex,
+                        audio_url: data.audio_url,
+                        offset: sentObj.offset,
+                        boundaries: data.boundaries
+                    });
 
-            // Adjust boundary offsets — use exact offset from indexOf, not approximation
-            currentBoundaries = (data.boundaries || []).map(b => ({
-                ...b,
-                text_index_start: b.text_index_start + myOffset,
-                text_index_end: b.text_index_end + myOffset,
-            }));
-
-            currentAudio = new Audio(data.audio_url);
-            sentenceIndex++;
-
-            // Pre-fetch next chunk in background while current plays
-            let nextData = null;
-            if (sentenceIndex < sentenceQueue.length) {
-                fetchAudioChunk(sentenceQueue[sentenceIndex].text, voice, rate)
-                    .then(d => { nextData = d; })
-                    .catch(() => { });
-            }
-
-            currentAudio.onended = () => {
-                cancelAnimationFrame(animationFrameId);
-                if (nextData && synthesisActive && sentenceIndex < sentenceQueue.length) {
-                    const nextSentObj = sentenceQueue[sentenceIndex];
-                    currentBoundaries = (nextData.boundaries || []).map(b => ({
-                        ...b,
-                        text_index_start: b.text_index_start + nextSentObj.offset,
-                        text_index_end: b.text_index_end + nextSentObj.offset,
-                    }));
-                    currentAudio = new Audio(nextData.audio_url);
-                    sentenceIndex++;
-                    currentAudio.onended = () => { cancelAnimationFrame(animationFrameId); playNextChunk(); };
-                    currentAudio.play();
-                    elStatus.textContent = `Playing... (${sentenceIndex}/${sentenceQueue.length})`;
-                    requestAnimationFrame(updateHighlight);
-                } else {
-                    playNextChunk();
+                    // If we just fetched the very first chunk, trigger playback immediately
+                    if (currentIndex === 0) {
+                        playNextChunk();
+                    }
+                } catch (e) {
+                    console.error("Fetch failed for index", currentIndex, e);
+                    if (synthesisActive && currentIndex === sentenceIndex) {
+                        // If the currently needed chunk fails, alert and stop.
+                        alert("Audio synthesis failed: " + e.message);
+                        stopPlayback();
+                    }
+                    return;
                 }
-            };
-
-            currentAudio.play();
-            elStatus.textContent = `Playing... (${sentenceIndex}/${sentenceQueue.length})`;
-            requestAnimationFrame(updateHighlight);
-
-        } catch (e) {
-            alert("Audio synthesis failed: " + e.message);
-            stopPlayback();
+            } else {
+                // Buffer is full, sleep for 200ms before checking again
+                await new Promise(r => setTimeout(r, 200));
+            }
         }
     }
 
-    playNextChunk();
+    // Player worker to consume the buffer sequentially
+    async function playNextChunk() {
+        if (!synthesisActive) return;
+
+        if (sentenceIndex >= sentenceQueue.length) {
+            stopPlayback();
+            elStatus.textContent = "Finished reading.";
+            return;
+        }
+
+        // Wait for the requested chunk to appear in the buffer
+        let nextChunkIndex = chunkBuffer.findIndex(c => c.index === sentenceIndex);
+        if (nextChunkIndex === -1) {
+            // Chunk isn't ready yet, show Buffering state
+            elStatus.textContent = `Buffering... (${sentenceIndex}/${sentenceQueue.length})`;
+            setTimeout(playNextChunk, 200); // Poll every 200ms
+            return;
+        }
+
+        // Pop the target chunk completely out of the buffer queue
+        const chunk = chunkBuffer.splice(nextChunkIndex, 1)[0];
+
+        // Adjust boundary offsets -> true fullText tracking
+        currentBoundaries = (chunk.boundaries || []).map(b => ({
+            ...b,
+            text_index_start: b.text_index_start + chunk.offset,
+            text_index_end: b.text_index_end + chunk.offset,
+        }));
+
+        currentAudio = new Audio(chunk.audio_url);
+        sentenceIndex++;
+
+        currentAudio.onended = () => {
+            cancelAnimationFrame(animationFrameId);
+            playNextChunk();
+        };
+
+        currentAudio.play();
+        elStatus.textContent = `Playing... (${sentenceIndex}/${sentenceQueue.length})`;
+        requestAnimationFrame(updateHighlight);
+    }
+
+    // Start fetching
+    elStatus.textContent = "Preparing audio...";
+    fillBuffer();
 }
 
 
